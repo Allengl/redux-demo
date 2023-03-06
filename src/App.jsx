@@ -3,7 +3,7 @@ import React, { useState, useContext } from 'react'
 const appContext = React.createContext(null)
 export const App = () => {
   const [appState, setAppState] = useState({
-    user: { name: 'frank', age: 18 }
+    user: { name: 'Allen', age: 18 }
   })
   const contextValue = { appState, setAppState }
   return (
@@ -15,7 +15,7 @@ export const App = () => {
   )
 }
 const 大儿子 = () => <section>大儿子<User /></section>
-const 二儿子 = () => <section>二儿子<UserModifier /></section>
+const 二儿子 = () => <section>二儿子<Wrapper /></section>
 const 幺儿子 = () => <section>幺儿子</section>
 const User = () => {
   const contextValue = useContext(appContext)
@@ -32,14 +32,25 @@ const reducer = (state, { type, payload }) => {
   }
 }
 
-const UserModifier = () => {
+const dispatch = (action) => {
+  setAppState(reducer(appState, action))
+}
+
+const Wrapper = () => {
   const { appState, setAppState } = useContext(appContext)
-  const onChange = (e) => {
-    appState.user.name = e.target.value
-    setAppState(reducer(appState, { type: 'updateUser', payload: { name: e.target.value } }))
+  const dispatch = (action) => {
+    setAppState(reducer(appState, action))
   }
+  return <UserModifier dispatch={dispatch} state={appState} />
+}
+
+const UserModifier = ({ dispatch, state }) => {
+  const onChange = (e) => {
+    state.user.name = e.target.value
+    dispatch({ type: 'updateUser', payload: { name: e.target.value } })
+  } 
   return <div>
-    <input value={appState.user.name}
+    <input value={state.user.name}
       onChange={onChange} />
   </div>
 }
