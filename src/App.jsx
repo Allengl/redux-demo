@@ -1,40 +1,6 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React from 'react'
+import { appContext, store, connect } from './redux.jsx'
 
-const connect = (Component) => {
-  return (props) => {
-    const { state, setState } = useContext(appContext)
-    const [_, update] = useState({})
-
-    useEffect(() => {
-      store.subscribe(() => update({}))
-    })
-
-    const dispatch = (action) => {
-      setState(reducer(state, action))
-    }
-    return <Component {...props} dispatch={dispatch} state={state} />
-  }
-}
-
-
-const appContext = React.createContext(null)
-const store = {
-  state: {
-    user: { name: 'Allen', age: 18 }
-  },
-  setState(newState) {
-    store.state = newState
-    store.listeners.map((l) => l(store.state))
-  },
-  listeners: [],
-  subscribe(fn) {
-    store.listeners.push(fn)
-    return () => {
-      const index = store.listeners.indexOf(fn)
-      store.listeners.splice(index, 1)
-    }
-  },
-}
 export const App = () => {
   return (
     <appContext.Provider value={store}>
@@ -53,16 +19,6 @@ const User = connect(({ state, dispatch }) => {
   return <div>User:{state.user.name}</div>
 })
 
-const reducer = (state, { type, payload }) => {
-  switch (type) {
-    case 'updateUser':
-      return { ...state, user: { ...state.user, ...payload } }
-    default:
-      return state
-  }
-}
-
-
 const UserModifier = connect(({ dispatch, state, children }) => {
 
   const onChange = (e) => {
@@ -75,3 +31,4 @@ const UserModifier = connect(({ dispatch, state, children }) => {
       onChange={onChange} />
   </div>
 })
+
