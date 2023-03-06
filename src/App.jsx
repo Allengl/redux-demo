@@ -1,13 +1,43 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
+
+const connect = (Component) => {
+  return (props) => {
+    const { state, setState } = useContext(appContext)
+    const [_, update] = useState({})
+
+    useEffect(() => {
+      store.subscribe(() => update({}))
+    })
+
+    const dispatch = (action) => {
+      setState(reducer(state, action))
+    }
+    return <Component {...props} dispatch={dispatch} state={state} />
+  }
+}
+
 
 const appContext = React.createContext(null)
-export const App = () => {
-  const [appState, setAppState] = useState({
+const store = {
+  state: {
     user: { name: 'Allen', age: 18 }
-  })
-  const contextValue = { appState, setAppState }
+  },
+  setState(newState) {
+    store.state = newState
+    store.listeners.map((l) => l(store.state))
+  },
+  listeners: [],
+  subscribe(fn) {
+    store.listeners.push(fn)
+    return () => {
+      const index = store.listeners.indexOf(fn)
+      store.listeners.splice(index, 1)
+    }
+  },
+}
+export const App = () => {
   return (
-    <appContext.Provider value={contextValue}>
+    <appContext.Provider value={store}>
       <大儿子 />
       <二儿子 />
       <幺儿子 />
@@ -17,11 +47,11 @@ export const App = () => {
 const 大儿子 = () => <section>大儿子<User /></section>
 const 二儿子 = () => <section>二儿子<UserModifier></UserModifier></section>
 const 幺儿子 = () => <section>幺儿子</section>
-const User = () => {
-  const contextValue = useContext(appContext)
-  return <div>User:{contextValue.appState.user.name}</div>
 
-}
+const User = connect(({ state, dispatch }) => {
+  console.log('User render');
+  return <div>User:{state.user.name}</div>
+})
 
 const reducer = (state, { type, payload }) => {
   switch (type) {
@@ -31,17 +61,10 @@ const reducer = (state, { type, payload }) => {
       return state
   }
 }
-const connect = (Component) => {
-  return (props) => {
-    const { appState, setAppState } = useContext(appContext)
-    const dispatch = (action) => {
-      setAppState(reducer(appState, action))
-    }
-    return <Component {...props} dispatch={dispatch} state={appState} />
-  }
-}
+
 
 const UserModifier = connect(({ dispatch, state, children }) => {
+
   const onChange = (e) => {
     state.user.name = e.target.value
     dispatch({ type: 'updateUser', payload: { name: e.target.value } })
