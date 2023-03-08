@@ -35,6 +35,18 @@ dispatch = (action) => {
   }
 }
 
+const prevDispatch2 = dispatch
+
+dispatch = (action) => {
+  if (action.payload instanceof Promise) {
+    action.payload.then((data) => {
+      dispatch({ ...action, payload: data })
+    })
+  } else {
+    prevDispatch2(action)
+  }
+}
+
 const changed = (oldState, newState) => {
   let changed = false;
   for (let key in oldState) {
