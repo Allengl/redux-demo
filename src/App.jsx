@@ -12,14 +12,21 @@ export const App = () => {
 }
 const 大儿子 = () => <section>大儿子<User /></section>
 const 二儿子 = () => <section>二儿子<UserModifier></UserModifier></section>
-const 幺儿子 = () => <section>幺儿子</section>
-
-const User = connect(({ state, dispatch }) => {
-  console.log('User render');
-  return <div>User:{state.user.name}</div>
+const 幺儿子 = connect(state => {
+  return { group: state.group }
+})(({ group }) => {
+  console.log('幺儿子 render');
+  return <section>幺儿子<div>Group: {group.name}</div></section>
 })
 
-const UserModifier = connect(({ dispatch, state, children }) => {
+const User = connect(state => {
+  return { user: state.user }
+})(({ user }) => {
+  console.log('User render');
+  return <div>User:{user.name}</div>
+})
+
+const UserModifier = connect()(({ dispatch, state, children }) => {
 
   const onChange = (e) => {
     state.user.name = e.target.value

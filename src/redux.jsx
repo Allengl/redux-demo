@@ -1,23 +1,39 @@
 import React, { useContext, useEffect, useState } from 'react'
-export const connect = (Component) => {
+
+const changed = (oldState, newState) => {
+  let changed = false;
+  for(let key in oldState) {
+    if (oldState[key] !== newState[key]) {
+      changed = true;
+    }
+  }
+  return changed
+};
+
+export const connect = (selector) => (Component) => {
   return (props) => {
     const { state, setState } = useContext(appContext)
     const [_, update] = useState({})
+    const data = selector ? selector(state) : { state }
 
-    useEffect(() => {
-      store.subscribe(() => update({}))
-    })
+    useEffect(() => store.subscribe(() => {
+      const newData = selector ? selector(store.state) : { state: store.state };
+      if (changed(data, newData)) {
+        update({})
+      }
+    }), [selector])
 
     const dispatch = (action) => {
       setState(reducer(state, action))
     }
-    return <Component {...props} dispatch={dispatch} state={state} />
+    return <Component {...props} {...data} dispatch={dispatch} state={state} />
   }
 }
 
 export const store = {
   state: {
-    user: { name: 'Allen', age: 18 }
+    user: { name: 'Allen', age: 18 },
+    group: { name: '前端组' }
   },
   setState(newState) {
     store.state = newState
