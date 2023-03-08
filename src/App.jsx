@@ -46,15 +46,28 @@ const User = connectToUser(({ user }) => {
   return <div>User:{user.name}</div>
 })
 
-const UserModifier = connectToUser(({ updateUser, user, children }) => {
-  console.log('UserModifier render');
-  const onChange = (e) => {
-    updateUser({ name: e.target.value })
+
+const ajax = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve({ data: { name: '3秒后的Allen' } })
+    }, 3000)
+  })
+}
+
+const fetchUser = (dispatch) => {
+  ajax('/user').then(response => {
+    dispatch({ type: 'updateUser', payload: response.data })
+  })
+}
+
+const UserModifier = connect(null, null)(({ state, dispatch }) => {
+  console.log('UserModifier执行了 ' + Math.random())
+  const onClick = (e) => {
+    dispatch(fetchUser)
   }
   return <div>
-    {children}
-    <input value={user.name}
-      onChange={onChange} />
+    <div>User: {state.user.name}</div>
+    <button onClick={onClick}>异步获取 user</button>
   </div>
 })
-

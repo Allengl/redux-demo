@@ -23,7 +23,17 @@ const store = {
   },
 }
 
-const dispatch = store.dispatch
+let dispatch = store.dispatch
+
+const prevDispatch = dispatch
+
+dispatch = (action) => {
+  if (typeof action === 'function') {
+    action(dispatch)
+  } else {
+    prevDispatch(action)
+  }
+}
 
 const changed = (oldState, newState) => {
   let changed = false;
