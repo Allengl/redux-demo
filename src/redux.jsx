@@ -13,7 +13,7 @@ const changed = (oldState, newState) => {
 export const connect = (selector, dispatchSelector) => (Component) => {
   return (props) => {
     const dispatch = (action) => {
-      setState(reducer(state, action))
+      setState(store.reducer(state, action))
     }
     const { state, setState } = useContext(appContext)
     const [_, update] = useState({})
@@ -31,11 +31,9 @@ export const connect = (selector, dispatchSelector) => (Component) => {
   }
 }
 
-export const store = {
-  state: {
-    user: { name: 'Allen', age: 18 },
-    group: { name: '前端组' }
-  },
+const store = {
+  state: undefined,
+  reducer: undefined,
   setState(newState) {
     store.state = newState
     store.listeners.map((l) => l(store.state))
@@ -50,15 +48,11 @@ export const store = {
   },
 }
 
-const reducer = (state, { type, payload }) => {
-  switch (type) {
-    case 'updateUser':
-      return { ...state, user: { ...state.user, ...payload } }
-    default:
-      return state
-  }
+export const createStore = (reducer, initState) => {
+  store.state = initState
+  store.reducer = reducer
+  return store
 }
-
 
 export const appContext = React.createContext(null)
 
